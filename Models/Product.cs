@@ -17,5 +17,19 @@ namespace MAUISqlLite.Models
         public decimal Price { get; set; }
 
         public Product Clone() => MemberwiseClone() as Product;
+
+        // validations
+        public (bool IsValid, string? ErrorMessage) Validate()
+        {
+            if (string.IsNullOrEmpty(Name))
+            {
+                return (false, $"{nameof(Name)} is required");
+            }
+            else if(Price <= 0)
+            {
+                return (false, $"{nameof(Price)} should be greater than 0");
+            }
+            return (true, null);
+        }
     }
 }

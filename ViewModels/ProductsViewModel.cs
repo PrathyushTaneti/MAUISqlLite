@@ -16,7 +16,7 @@ namespace MAUISqlLite.ViewModels
         private readonly DbContext dbContext = dbContext;
 
         [ObservableProperty]
-        private ObservableCollection<Product> products;
+        private ObservableCollection<Product> products = new();
 
         [ObservableProperty]
         private Product _operatingProduct = new();
@@ -53,6 +53,12 @@ namespace MAUISqlLite.ViewModels
         private async Task UpsertProductAsync()
         {
             if (OperatingProduct is null) return;
+            var (isValid, errorMessage) = OperatingProduct.Validate();
+            if (!isValid)
+            {
+                await Shell.Current.DisplayAlert("Validation Error", errorMessage, "Okay");
+                return;
+            }
             string busyText = OperatingProduct.Id == 0 ? "Creating Product" : "Updating Product";
             await ExecuteAsync( async() =>
             {
@@ -60,6 +66,7 @@ namespace MAUISqlLite.ViewModels
                 {
                     // Create Product
                     await this.dbContext.AddItemAsync<Product>(OperatingProduct);
+                    Products.Add(OperatingProduct);
                 }
                 else
                 {
